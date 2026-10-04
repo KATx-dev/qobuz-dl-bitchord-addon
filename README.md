@@ -2,11 +2,16 @@
 
 A TypeScript/Node.js, playback-only BitChord addon exposing `/manifest.json`, `/search`, and `/stream/:id`.
 
-## Important upstream finding
+## Upstream provider
 
-The requested `https://qobuz-dl.vercel.app/` currently redirects to `https://qobuz.vercel.app/`. The publicly reachable service is a Next.js web UI (home/search/transfers). No documented public JSON API or authorized stream-resolution interface was found at the supplied service URL. This project therefore **does not guess routes, scrape private APIs, extract tokens, bypass authentication, or download media**.
+The default provider uses the verified Qobuz-DL-compatible routes at `https://qobuz.vercel.app/` (the old `qobuz-dl.vercel.app` hostname redirects there):
 
-The default `QOBUZ_PROVIDER=stub` is intentionally honest: search returns `{ "tracks": [] }` and stream returns `404`. This is safer than falsely claiming playable Qobuz audio. The provider boundary is in `src/providers/` and can be replaced with an authorized implementation.
+- `/api/get-music?q=...&offset=0` for catalogue search
+- `/api/download-music?track_id=...&quality=...` for a playable URL
+
+The provider only consumes the public JSON response, never handles Qobuz credentials, and does not expose upstream headers or URLs except for the validated playback URL returned to BitChord. It does not guess routes, scrape private APIs, extract tokens, bypass authentication, or download media.
+
+The default `QOBUZ_PROVIDER=qobuzdl` targets that public service. If the upstream returns an authorization or availability error, the addon returns a clean upstream failure rather than fabricating tracks or streams. `QOBUZ_PROVIDER=stub` remains available for local contract-only testing.
 
 ## Contract
 
@@ -30,9 +35,18 @@ curl -i 'http://localhost:3000/stream/qobuz_invalid000?quality=LOSSLESS&atmos=au
 
 Node.js 20+ is required. Environment variables are read directly by the process; use a secret manager in production rather than committing `.env`.
 
-## Connecting an authorized provider
+## Provider configuration
 
-Implement or configure only against a documented, authorized service. For the included JSON HTTP adapter:
+The default configuration is:
+
+```dotenv
+QOBUZ_PROVIDER=qobuzdl
+QOBUZ_UPSTREAM_BASE_URL=https://qobuz.vercel.app
+```
+
+The base URL is configurable if the public service changes hostnames or you operate an authorized compatible deployment.
+
+For a different documented JSON provider, the generic adapter remains available:
 
 ```dotenv
 QOBUZ_PROVIDER=http
