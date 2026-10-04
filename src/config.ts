@@ -19,7 +19,7 @@ const positiveInt = (name: string, fallback: number): number => {
 export function loadConfig(): Config {
   const provider = (process.env.QOBUZ_PROVIDER ?? 'qobuzdl').toLowerCase();
   if (provider !== 'stub' && provider !== 'http' && provider !== 'qobuzdl') throw new Error('QOBUZ_PROVIDER must be stub, http, or qobuzdl');
-  const apiBaseUrl = process.env.QOBUZ_API_BASE_URL ?? process.env.QOBUZ_UPSTREAM_BASE_URL ?? (provider === 'qobuzdl' ? 'https://qobuz.vercel.app' : undefined);
+  const apiBaseUrl = process.env.QOBUZ_API_BASE_URL ?? process.env.QOBUZ_UPSTREAM_BASE_URL ?? (provider === 'qobuzdl' ? 'https://qobuz-dll.vercel.app' : undefined);
   if (provider === 'http' && (!apiBaseUrl || !/^https:\/\//i.test(apiBaseUrl))) {
     throw new Error('QOBUZ_API_BASE_URL must be an HTTPS URL when QOBUZ_PROVIDER=http');
   }

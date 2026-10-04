@@ -4,7 +4,7 @@ A TypeScript/Node.js, playback-only BitChord addon exposing `/manifest.json`, `/
 
 ## Upstream provider
 
-The default provider uses the verified Qobuz-DL-compatible routes at `https://qobuz.vercel.app/` (the old `qobuz-dl.vercel.app` hostname redirects there):
+The default provider uses the verified Qobuz-DL-compatible routes at `https://qobuz-dll.vercel.app/`:
 
 - `/api/get-music?q=...&offset=0` for catalogue search
 - `/api/download-music?track_id=...&quality=...` for a playable URL
@@ -41,7 +41,7 @@ The default configuration is:
 
 ```dotenv
 QOBUZ_PROVIDER=qobuzdl
-QOBUZ_UPSTREAM_BASE_URL=https://qobuz.vercel.app
+QOBUZ_UPSTREAM_BASE_URL=https://qobuz-dll.vercel.app
 ```
 
 The base URL is configurable if the public service changes hostnames or you operate an authorized compatible deployment.
