@@ -64,8 +64,10 @@ function parseQuality(value?: string): Quality {
   throw badRequest('quality must be LOSSLESS, HIGH, or LOW');
 }
 
-app.listen({ host: config.host, port: config.port }).then(() => {
-  app.log.info({ host: config.host, port: config.port, provider: config.provider }, 'BitChord addon listening');
-}).catch(error => { app.log.error(error); process.exit(1); });
+if (process.env.VERCEL !== '1') {
+  app.listen({ host: config.host, port: config.port }).then(() => {
+    app.log.info({ host: config.host, port: config.port, provider: config.provider }, 'BitChord addon listening');
+  }).catch(error => { app.log.error(error); process.exit(1); });
+}
 
 export { app, parseQuality, publicId };
