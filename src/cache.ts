@@ -4,8 +4,11 @@ export class TtlCache<V> {
   get(key: string): V | undefined {
     const hit = this.values.get(key);
     if (!hit) return undefined;
-    if (hit.expiresAt <= Date.now()) { this.values.delete(key); return undefined; }
+    if (hit.expiresAt <= Date.now()) return undefined;
     return hit.value;
+  }
+  getStale(key: string): V | undefined {
+    return this.values.get(key)?.value;
   }
   set(key: string, value: V): void {
     if (this.values.size >= this.maxEntries && !this.values.has(key)) this.values.delete(this.values.keys().next().value as string);

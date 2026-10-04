@@ -2,7 +2,9 @@ export interface Config {
   host: string;
   port: number;
   requestTimeoutMs: number;
+  upstreamRetries: number;
   cacheTtlMs: number;
+  idSecret: string;
   provider: 'stub' | 'http' | 'qobuzdl';
   apiBaseUrl?: string;
   searchPath?: string;
@@ -26,8 +28,10 @@ export function loadConfig(): Config {
   return {
     host: process.env.HOST ?? '0.0.0.0',
     port: positiveInt('PORT', 3000),
-    requestTimeoutMs: positiveInt('REQUEST_TIMEOUT_MS', 8000),
-    cacheTtlMs: positiveInt('CACHE_TTL_SECONDS', 60) * 1000,
+    requestTimeoutMs: positiveInt('REQUEST_TIMEOUT_MS', 10000),
+    upstreamRetries: positiveInt('UPSTREAM_RETRIES', 2),
+    cacheTtlMs: positiveInt('CACHE_TTL_SECONDS', 300) * 1000,
+    idSecret: process.env.QOBUZ_ID_SECRET ?? 'qobuz-bitchord-id-secret-v1',
     provider,
     apiBaseUrl,
     searchPath: process.env.QOBUZ_SEARCH_PATH,

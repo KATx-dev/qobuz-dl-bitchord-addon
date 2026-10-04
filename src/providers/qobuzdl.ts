@@ -28,21 +28,37 @@ export class QobuzDlProvider implements QobuzProvider {
   private async request(path: string, params: Record<string, string>): Promise<unknown> {
     const url = new URL(path, this.config.apiBaseUrl);
     for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.config.requestTimeoutMs);
-    try {
-      const response = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal });
-      let body: unknown;
-      try { body = await response.json(); } catch { throw new UpstreamError(502, 'Qobuz-DL provider returned invalid JSON'); }
-      if (!response.ok) throw new UpstreamError(response.status >= 500 ? 502 : 502, upstreamMessage(body));
-      if (isRecord(body) && body.success === false) throw new UpstreamError(502, upstreamMessage(body));
-      return body;
-    } catch (error) {
-      if (error instanceof UpstreamError) throw error;
-      throw new UpstreamError(502, 'Qobuz-DL provider request failed');
-    } finally { clearTimeout(timeout); }
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= this.config.upstreamRetries; attempt += 1) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.config.requestTimeoutMs);
+      try {
+        const response = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal });
+        let body: unknown;
+        try { body = await response.json(); } catch { throw new UpstreamError(502, 'Qobuz-DL provider returned invalid JSON'); }
+        if (!response.ok) {
+          const error = new UpstreamError(retryableStatus(response.status) ? 502 : response.status === 404 ? 404 : 400, upstreamMessage(body));
+          if (!retryableStatus(response.status) || attempt >= this.config.upstreamRetries) throw error;
+          lastError = error;
+        } else if (isRecord(body) && body.success === false) {
+          const error = new UpstreamError(502, upstreamMessage(body));
+          if (attempt >= this.config.upstreamRetries) throw error;
+          lastError = error;
+        } else return body;
+      } catch (error) {
+        if (error instanceof UpstreamError) {
+          if (error.status !== 502 || attempt >= this.config.upstreamRetries) throw error;
+        }
+        lastError = error;
+      } finally { clearTimeout(timeout); }
+      await delay(200 * 2 ** attempt);
+    }
+    throw lastError instanceof UpstreamError ? lastError : new UpstreamError(502, 'Qobuz-DL provider request failed');
   }
 }
+
+function retryableStatus(status: number): boolean { return status === 408 || status === 425 || status === 429 || status >= 500; }
+function delay(ms: number): Promise<void> { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function qualityId(quality: Quality): string {
   // IDs verified from the Qobuz-DL route schema: 27, 7, 6, and 5.
