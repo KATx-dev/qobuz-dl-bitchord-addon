@@ -1,0 +1,19 @@
+{
+  "id": "com.bitchord.qobuz",
+  "name": "Qobuz",
+  "version": "1.0.0",
+  "resources": ["search", "stream"],
+  "allowDownloads": 0,
+  "settings": [
+    {
+      "key": "quality",
+      "type": "select",
+      "default": "lossless",
+      "options": [
+        { "label": "Lossless", "value": "lossless" },
+        { "label": "High", "value": "high" },
+        { "label": "Low", "value": "low" }
+      ]
+    }
+  ]
+}
