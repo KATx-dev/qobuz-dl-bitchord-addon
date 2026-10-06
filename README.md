@@ -1,6 +1,8 @@
 # Qobuz BitChord Addon
 
-A TypeScript/Node.js, playback-only BitChord addon exposing `/manifest.json`, `/search`, and `/stream/:id`.
+A TypeScript/Node.js, playback-only BitChord addon exposing `/manifest.json`, `/search`, and `/stream/:id`, plus a lightweight Qobuz TV web page at `/`.
+
+The home page is intentionally built without a frontend framework: it uses plain HTML/CSS and `XMLHttpRequest`, with large remote-friendly controls and a native audio element for older Sony Bravia/Vewd browsers.
 
 ## Upstream provider
 

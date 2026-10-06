@@ -5,11 +5,13 @@ import { AppError, badRequest, notFound } from './errors.js';
 import { normalizeTrack, publicId, streamResponse, upstreamIdFromPublicId } from './normalize.js';
 import { createProvider } from './providers/index.js';
 import type { Quality, PublicTrack } from './types.js';
+import { homePage } from './home.js';
 
 const config = loadConfig();
 const provider = createProvider(config);
 const searchCache = new TtlCache<PublicTrack[]>(config.cacheTtlMs);
 const app = Fastify({ logger: { redact: ['req.headers.authorization', 'req.headers.cookie', '*.url'] } });
+app.get('/', async (_request, reply) => reply.type('text/html; charset=utf-8').send(homePage));
 
 app.get('/manifest.json', async (_request, reply) => reply.send({
   id: 'com.bitchord.qobuz', name: 'Qobuz', version: '1.0.0', resources: ['search', 'stream'],
